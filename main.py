@@ -20,7 +20,7 @@ def download_audio(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
     
         # Check if the message contains a YouTube link
-    if update.message.text and 'youtube.com' in update.message.text:
+    if update.message.text and 'youtube.com' and 'youtu.be' in update.message.text:
         try:
             # Download the YouTube video
             youtube_url = update.message.text
