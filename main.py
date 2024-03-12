@@ -7,7 +7,7 @@ from pydub import AudioSegment
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-TOKEN="6516376786:AAFxmIUbqDQGhmW9Rg6gTNQ8KlMeHmVpbKE"
+TOKEN=""
 
 DOWNLOAD_FOLDER = './'
 
