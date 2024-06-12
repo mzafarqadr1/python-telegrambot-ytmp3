@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
 from pytube import YouTube
 from pydub import AudioSegment
 
@@ -61,7 +61,7 @@ def main() -> None:
 
     # Register command and message handlers
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, download_audio))
+    dp.add_handler(MessageHandler(filters.text & ~filters.command, download_audio))
 
     # Start the Bot
     updater.start_polling()
