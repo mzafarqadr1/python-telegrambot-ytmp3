@@ -7,7 +7,7 @@ from pydub import AudioSegment
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-TOKEN="7366324028:AAElo7w_SOf4VJTD2b2h_DA1nkSU2w-ueww"
+TOKEN="YOUR TELEGRAM TOKEN HERE"
 
 DOWNLOAD_FOLDER = './'
 
