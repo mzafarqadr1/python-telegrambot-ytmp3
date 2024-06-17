@@ -1,36 +1,36 @@
 import os
 import logging
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from pytube import YouTube
 from pydub import AudioSegment
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-TOKEN=""
+TOKEN="7366324028:AAElo7w_SOf4VJTD2b2h_DA1nkSU2w-ueww"
 
 DOWNLOAD_FOLDER = './'
 
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('Hello! Send me a YouTube link and I will convert it to MP3 for you.')
-    
-def download_audio(update: Update, context: CallbackContext) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Hello! Send me a YouTube link and I will convert it to MP3 for you.')
+
+async def download_audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.message.chat_id
     
-        # Check if the message contains a YouTube link
-    if update.message.text and 'youtube.com' and 'youtu.be' in update.message.text:
+    # Check if the message contains a YouTube link
+    if update.message.text and ('youtube.com' in update.message.text or 'youtu.be' in update.message.text):
         try:
             # Download the YouTube video
             youtube_url = update.message.text
             yt = YouTube(youtube_url)
             video_stream = yt.streams.filter(only_audio=True).first()
-            video_stream.download(DOWNLOAD_FOLDER)
+            video_file_path = video_stream.download(DOWNLOAD_FOLDER)
 
             # Convert to MP3 with 320 kbps bitrate
-            mp3_file_path = os.path.join(DOWNLOAD_FOLDER, f"your-song.mp3")
-            audio = AudioSegment.from_file(video_stream.default_filename)
+            mp3_file_path = os.path.join(DOWNLOAD_FOLDER, f"{yt.title}.mp3")
+            audio = AudioSegment.from_file(video_file_path)
             
             # Set the desired audio bitrate to 320 kbps
             audio = audio.set_frame_rate(48000).set_channels(2).set_sample_width(2)
@@ -39,36 +39,28 @@ def download_audio(update: Update, context: CallbackContext) -> None:
             audio.export(mp3_file_path, format="mp3", bitrate="320k")
 
             # Send the MP3 file to the user
-            context.bot.send_audio(chat_id=chat_id, audio=open(mp3_file_path, 'rb'))
+            await context.bot.send_audio(chat_id=chat_id, audio=open(mp3_file_path, 'rb'))
 
             # Clean up: delete the downloaded video and converted MP3
-            os.remove(video_stream.default_filename)
+            os.remove(video_file_path)
             os.remove(mp3_file_path)
 
         except Exception as e:
             logging.error(f"Error processing YouTube link: {e}")
-            update.message.reply_text("Error processing YouTube link. Please try again.")
+            await update.message.reply_text("Error processing YouTube link. Please try again.")
 
     else:
-        update.message.reply_text("Please provide a valid YouTube link.")
-        
-        
-def main() -> None:
-    updater = Updater(TOKEN)
+        await update.message.reply_text("Please provide a valid YouTube link.")
 
-    # Get the dispatcher to register handlers
-    dp = updater.dispatcher
+def main() -> None:
+    application = ApplicationBuilder().token(TOKEN).build()
 
     # Register command and message handlers
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(filters.text & ~filters.command, download_audio))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_audio))
 
     # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until you send a signal to stop it
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
-             
